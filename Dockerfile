@@ -8,7 +8,7 @@ FROM node:18-alpine As development
 WORKDIR /usr/src/app
 
 # Install app dependencies
-COPY --chown=node:node package*.json .
+COPY --chown=node:node package*.json ./
 
 RUN npm ci
 
@@ -28,7 +28,7 @@ FROM node:18-alpine As build
 WORKDIR /usr/src/app
 
 # Copy package.json and package-lock.json
-COPY --chown=node:node package*.json .
+COPY --chown=node:node package*.json ./
 
 # Copy node_modules from development in order to have nesjs cli available to run build
 COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
