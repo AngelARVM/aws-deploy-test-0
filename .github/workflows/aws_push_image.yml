@@ -1,4 +1,4 @@
-name: Deploy to ECR
+name: Push to ECR
 
 on:
   workflow_dispatch:
@@ -31,3 +31,20 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Fill in the new Image ID in the amazon ecs task definition with the newly built image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@c804dfbdd57f713b6c079302a4c01db7017a36fc
+        with:
+          task-definition: ${{secrets.AWS_ECS_TASK_DEFINITION}}
+          container-name: ${{secrets.AWS_ECS_CONTAINER_NAME}}
+          image: ${{ steps.build.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@df9643053eda01f169e64a0e60233aacca83799a
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{secrets.AWS_ECS_SERVICE_NAME }}
+          cluster: ${{secrets.AWS_ECS_CLUSTER_NAME }}
+          wait-for-service-stability: true
