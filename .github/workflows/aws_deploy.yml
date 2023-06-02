@@ -49,4 +49,4 @@ jobs:
           task-definition: ${{ steps.task-def.outputs.task-definition }}
           service: ${{secrets.AWS_ECS_SERVICE_NAME }}
           cluster: ${{secrets.AWS_ECS_CLUSTER_NAME }}
-          wait-for-service-stability: true
+          wait-for-service-stability: false
